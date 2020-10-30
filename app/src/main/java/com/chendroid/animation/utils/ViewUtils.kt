@@ -3,16 +3,14 @@ package com.chendroid.animation.utils
 import android.app.Service
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Outline
 import android.graphics.Rect
 import android.os.Build
 import android.os.Handler
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.Log
-import android.view.MotionEvent
-import android.view.PixelCopy
-import android.view.View
-import android.view.Window
+import android.view.*
 import androidx.annotation.RequiresApi
 import java.lang.Exception
 
@@ -54,6 +52,7 @@ object ViewUtils {
                     }, Handler()
                 )
         } catch (e: Exception) {
+            Log.i("zc_test", "exception is $e")
             e.printStackTrace()
         }
     }
@@ -112,5 +111,22 @@ object ViewUtils {
                 vibrate(30L)
             }
         }
+    }
+
+
+    /**
+     * 为当前 view 设置四周圆角
+     * radiusPx ， 设置圆角的半径，单位是 px
+     */
+    @JvmStatic
+    fun setRoundCorner(roundView: View, radiusPx: Int) {
+        roundView.clipToOutline = true
+        roundView.outlineProvider = object : ViewOutlineProvider() {
+            override fun getOutline(view: View, outline: Outline) {
+                outline.setRoundRect(0, 0, view.width, view.height, radiusPx.toFloat())
+            }
+        }
+        // 刷新
+        roundView.invalidateOutline()
     }
 }

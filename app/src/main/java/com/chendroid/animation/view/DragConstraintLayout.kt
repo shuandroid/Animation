@@ -6,6 +6,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.graphics.*
+import android.os.Build
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
@@ -14,6 +15,7 @@ import android.view.ViewConfiguration
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.OvershootInterpolator
 import androidx.annotation.NonNull
+import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.chendroid.animation.utils.ViewUtils
 import kotlin.math.pow
@@ -62,6 +64,7 @@ class DragConstraintLayout @JvmOverloads constructor(
     private val bitmapPaint: Paint by lazy {
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.FILL
+            alpha = 255
         }
     }
 
@@ -210,16 +213,17 @@ class DragConstraintLayout @JvmOverloads constructor(
     /**
      * 设置目标 view , 并从中获取到 bitmap
      */
+    @RequiresApi(Build.VERSION_CODES.O)
     fun setTargetView(@NonNull view: View) {
         targetDragView = view
         if (targetDragView.visibility == View.GONE) {
             return
         }
-        targetDragView.post {
+        targetDragView.postDelayed({
             ViewUtils.fetchBitmapFromView(targetDragView, (context as Activity).window) { bitmap ->
                 setTestTargetBitmap(bitmap)
             }
-        }
+        }, 1000)
     }
 
     /**
