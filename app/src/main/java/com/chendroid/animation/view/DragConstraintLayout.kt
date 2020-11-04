@@ -58,7 +58,7 @@ class DragConstraintLayout @JvmOverloads constructor(
     private var isFirstMove = true
 
     private lateinit var targetDragView: View
-    private lateinit var targetBitmap: Bitmap
+    private var targetBitmap: Bitmap? = null
 
     // 绘制 bitmap 的画笔
     private val bitmapPaint: Paint by lazy {
@@ -97,7 +97,7 @@ class DragConstraintLayout @JvmOverloads constructor(
     }
 
     override fun onInterceptTouchEvent(event: MotionEvent): Boolean {
-        if (targetDragView == null) {
+        if (targetDragView == null || targetBitmap == null) {
             return super.onInterceptTouchEvent(event)
         }
 
@@ -219,6 +219,8 @@ class DragConstraintLayout @JvmOverloads constructor(
         if (targetDragView.visibility == View.GONE) {
             return
         }
+        // 延迟 1s 是发现在某些机型上，第一次进入界面后，拖拽时显示不出 bitmap,
+        // 报错为：E/DRM/DcfDecoder: decodeDrmImageIfNeeded stream ， 暂未找到原因
         targetDragView.postDelayed({
             ViewUtils.fetchBitmapFromView(targetDragView, (context as Activity).window) { bitmap ->
                 setTestTargetBitmap(bitmap)
@@ -452,6 +454,9 @@ class DragConstraintLayout @JvmOverloads constructor(
             removeAllListeners()
             cancel()
         }
+
+        positionXList.clear()
+        positionYList.clear()
     }
 
     // 恢复原来位置动画, 基本没问题
@@ -553,29 +558,36 @@ class DragConstraintLayout @JvmOverloads constructor(
      */
     override fun dispatchDraw(canvas: Canvas) {
         super.dispatchDraw(canvas)
+        if (targetBitmap == null) {
+            return
+        }
 
         if (isScrolling) {
-            // 绘画第二个第三个 bitmap
-            bitmapPaint.alpha = (255 * (0.65)).toInt()
-            canvas.drawBitmap(targetBitmap, thirdX, thirdY, bitmapPaint)
-            bitmapPaint.alpha = (255 * (0.85)).toInt()
-            canvas.drawBitmap(targetBitmap, secondX, secondY, bitmapPaint)
-            // 第一个，最上面的 bitmap
-            bitmapPaint.alpha = 255
-            canvas.drawBitmap(targetBitmap, mCurX, mCurY, bitmapPaint)
+            targetBitmap?.run {
+                // 绘画第二个第三个 bitmap
+                bitmapPaint.alpha = (255 * (0.65)).toInt()
+                canvas.drawBitmap(this, thirdX, thirdY, bitmapPaint)
+                bitmapPaint.alpha = (255 * (0.85)).toInt()
+                canvas.drawBitmap(this, secondX, secondY, bitmapPaint)
+                // 第一个，最上面的 bitmap
+                bitmapPaint.alpha = 255
+                canvas.drawBitmap(this, mCurX, mCurY, bitmapPaint)
+            }
         }
 
         // 复位 view 时的操作
         if (isResettingView) {
-            // 第三个 bitmap
-            bitmapPaint.alpha = (255 * (0.65)).toInt()
-            canvas.drawBitmap(targetBitmap, thirdX, thirdY, bitmapPaint)
-            // 第二个 bitmap
-            bitmapPaint.alpha = (255 * (0.85)).toInt()
-            canvas.drawBitmap(targetBitmap, secondX, secondY, bitmapPaint)
-            // 第一个 bitmap
-            bitmapPaint.alpha = 255
-            canvas.drawBitmap(targetBitmap, mCurX, mCurY, bitmapPaint)
+            targetBitmap?.run {
+                // 第三个 bitmap
+                bitmapPaint.alpha = (255 * (0.65)).toInt()
+                canvas.drawBitmap(this, thirdX, thirdY, bitmapPaint)
+                // 第二个 bitmap
+                bitmapPaint.alpha = (255 * (0.85)).toInt()
+                canvas.drawBitmap(this, secondX, secondY, bitmapPaint)
+                // 第一个 bitmap
+                bitmapPaint.alpha = 255
+                canvas.drawBitmap(this, mCurX, mCurY, bitmapPaint)
+            }
         }
     }
 
