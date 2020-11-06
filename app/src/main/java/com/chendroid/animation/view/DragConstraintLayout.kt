@@ -275,7 +275,7 @@ class DragConstraintLayout @JvmOverloads constructor(
         targetDragView.visibility = View.INVISIBLE
         isScrolling = true
 
-//        // todo 待处理，清理 list 数据 clearAndUpdateList()
+//        // todo 待处理悬停状态下，清理 list 数据 clearAndUpdateList()
 //        if ((mCurX == mPrevX && mCurY == mPrevY) && (secondX == mCurX && secondY == mCurY) && (thirdX == mCurX && thirdY == mCurY)) {
 //            Log.i("zc_test", "handleDragMoving() 可以清理坐标数据")
 //            secondAnimator?.run {
@@ -297,7 +297,7 @@ class DragConstraintLayout @JvmOverloads constructor(
         calculateThirdBitmapPosition()
     }
 
-    // todo 需要找个时机，当悬停时，需要清空 list , 丢弃一些历史数据；
+    // todo 需要找个时机，当悬停时，需要清空 list , 丢弃一些历史数据，防止 ，list 过大；
     private fun clearAndUpdateList() {
         Log.i("TestConstraintLayout", "clearAndUpdateList()")
         positionXList.clear()
@@ -457,6 +457,10 @@ class DragConstraintLayout @JvmOverloads constructor(
 
         positionXList.clear()
         positionYList.clear()
+        startSecondPosition = 0
+        endSecondPosition = 0
+        startThirdPosition = 0
+        endSecondPosition = 0
     }
 
     // 恢复原来位置动画, 基本没问题
